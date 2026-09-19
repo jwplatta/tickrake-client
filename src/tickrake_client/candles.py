@@ -36,7 +36,9 @@ class CandlesClient:
         if start is not None:
             df = df[df["datetime"] >= pd.Timestamp(start, tz="UTC")]
         if end is not None:
-            end_ts = pd.Timestamp(end, tz="UTC") + pd.Timedelta(days=1) - pd.Timedelta(nanoseconds=1)
+            end_ts = (
+                pd.Timestamp(end, tz="UTC") + pd.Timedelta(days=1) - pd.Timedelta(nanoseconds=1)
+            )
             df = df[df["datetime"] <= end_ts]
         return df
 

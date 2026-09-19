@@ -1,6 +1,6 @@
 # tickrake-client
 
-[![CI](https://github.com/jwplatta/tickrake-client/actions/workflows/ci.yml/badge.svg)](https://github.com/jwplatta/tickrake-client/actions/workflows/ci.yml)
+[![Tests](https://github.com/jwplatta/tickrake-client/actions/workflows/ci.yml/badge.svg)](https://github.com/jwplatta/tickrake-client/actions/workflows/ci.yml)
 
 Python client for reading data collected by [tickrake](https://github.com/jwplatta/tickrake). Provides a unified interface over local filesystem data, MinIO intraday snapshots, and S3 historical archives.
 
@@ -50,12 +50,13 @@ client = TickrakeClient()
 
 ```python
 # List available symbols and frequencies
-client.candles.list_providers()          # ['ibkr-paper', 'schwab', ...]
-client.candles.list_frequencies("schwab") # ['1min', '5min', '30min', 'day']
+client.candles.list_providers()  # ['ibkr-paper', 'schwab', ...]
+client.candles.list_frequencies("schwab")  # ['1min', '5min', '30min', 'day']
 client.candles.list_symbols("schwab", frequency="5min")  # ['SPX', 'SPY', ...]
 
 # Read candle data
 from datetime import date
+
 df = client.candles.read("SPX", "5min", provider="schwab")
 df = client.candles.read("SPX", "5min", start=date(2026, 1, 1), end=date(2026, 6, 1))
 
@@ -67,9 +68,9 @@ client.candles.date_range("SPX", "5min")  # (datetime, datetime)
 
 ```python
 # Discover available data
-client.level_one.list_providers()                        # ['schwab']
-client.level_one.list_symbols("schwab")                  # ['IWM', 'QQQ', 'SPY']
-client.level_one.list_dates("schwab", symbol="SPY")      # [date(2026, 9, 18)]
+client.level_one.list_providers()  # ['schwab']
+client.level_one.list_symbols("schwab")  # ['IWM', 'QQQ', 'SPY']
+client.level_one.list_dates("schwab", symbol="SPY")  # [date(2026, 9, 18)]
 
 # Read all snapshots for a symbol on a date
 df = client.level_one.read("SPY", date(2026, 9, 18))

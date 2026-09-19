@@ -38,8 +38,11 @@ def test_read(cfg, candles_dir):
 def test_read_with_date_filter(cfg, candles_dir):
     client = CandlesClient(cfg)
     df = client.read(
-        "SPY", "5min", provider="test-provider",
-        start=date(2026, 1, 5), end=date(2026, 1, 5),
+        "SPY",
+        "5min",
+        provider="test-provider",
+        start=date(2026, 1, 5),
+        end=date(2026, 1, 5),
     )
     assert len(df) == 3
 

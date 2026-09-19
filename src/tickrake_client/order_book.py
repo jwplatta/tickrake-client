@@ -38,7 +38,7 @@ class OrderBookClient:
             return pd.DataFrame()
 
         combined = pa.concat_tables([pq.read_table(f) for f in files])
-        df = combined.to_pandas()
+        df: pd.DataFrame = combined.to_pandas()
         return df.sort_values("received_at_ms").reset_index(drop=True)
 
     def list_symbols(

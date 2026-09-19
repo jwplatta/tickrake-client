@@ -94,7 +94,7 @@ class FilesystemClient:
         start_exp: date,
         end_exp: date,
         provider: str = "schwab",
-    ) -> list[tuple[datetime, Path]]:
+    ) -> list[date]:
         """Return distinct expiration dates in [start_exp, end_exp] with snapshots on sample_date."""
         expiries: set[date] = set()
         for _dt, p in self.scan_snapshots(root, sample_date, provider):
