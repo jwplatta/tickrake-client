@@ -6,7 +6,7 @@ import json
 from datetime import UTC, date, datetime
 from pathlib import Path
 
-from tickrake_client.config import TickrakeConfig
+from tractatus.tickrake.config import TickrakeConfig
 
 
 class FilesystemClient:

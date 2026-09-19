@@ -10,7 +10,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
-from tickrake_client.config import TickrakeConfig
+from tractatus.tickrake.config import TickrakeConfig
 
 
 @pytest.fixture

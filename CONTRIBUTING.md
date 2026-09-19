@@ -35,7 +35,7 @@ Write simple tests that focus on core functionality — reading data, discovery 
 
 ## Project boundaries
 
-- Keep production code under `src/tickrake_client/`.
+- Keep production code under `src/tractatus/`.
 - Keep automated tests under `tests/`.
 - This package is read-only against tickrake data. Never write, modify, or delete files under `~/.tickrake/`.
 - Prefer small, focused modules per dataset type over large mixed-responsibility files.

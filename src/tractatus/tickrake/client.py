@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from tickrake_client.candles import CandlesClient
-from tickrake_client.config import TickrakeConfig
-from tickrake_client.level_one import LevelOneClient
-from tickrake_client.options.archive import ArchiveClient
-from tickrake_client.options.filesystem import FilesystemClient
-from tickrake_client.options.intraday import IntradayClient
-from tickrake_client.order_book import OrderBookClient
+from tractatus.tickrake.candles import CandlesClient
+from tractatus.tickrake.config import TickrakeConfig
+from tractatus.tickrake.level_one import LevelOneClient
+from tractatus.tickrake.options.archive import ArchiveClient
+from tractatus.tickrake.options.filesystem import FilesystemClient
+from tractatus.tickrake.options.intraday import IntradayClient
+from tractatus.tickrake.order_book import OrderBookClient
 
 
 class TickrakeClient:

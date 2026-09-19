@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from tickrake_client.candles import CandlesClient
+from tractatus.tickrake.candles import CandlesClient
 
 
 def test_list_providers(cfg, candles_dir):

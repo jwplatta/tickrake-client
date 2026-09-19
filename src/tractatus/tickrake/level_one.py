@@ -1,4 +1,4 @@
-"""Order book data access — local parquet files organized by provider/date/symbol."""
+"""Level one quote data access — local parquet files organized by provider/date/symbol."""
 
 from __future__ import annotations
 
@@ -10,12 +10,12 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from tickrake_client.config import TickrakeConfig
+from tractatus.tickrake.config import TickrakeConfig
 
 _FILENAME_RE = re.compile(r"^(.+?)_(\d{6})Z\.parquet$")
 
 
-class OrderBookClient:
+class LevelOneClient:
     def __init__(self, cfg: TickrakeConfig) -> None:
         self._cfg = cfg
 
@@ -25,7 +25,7 @@ class OrderBookClient:
         sample_date: date,
         provider: str = "schwab",
     ) -> pd.DataFrame:
-        """Read all order book snapshots for a symbol on a given date.
+        """Read all level one snapshots for a symbol on a given date.
 
         Returns a concatenated DataFrame sorted by received_at_ms.
         """
@@ -46,11 +46,11 @@ class OrderBookClient:
         provider: str = "schwab",
         sample_date: date | None = None,
     ) -> list[str]:
-        """Return sorted list of symbols with order book data.
+        """Return sorted list of symbols with level one data.
 
         If sample_date is given, only check that date. Otherwise scan all dates.
         """
-        base = self._cfg.provider_order_book_dir(provider)
+        base = self._cfg.provider_level_one_dir(provider)
         if not base.exists():
             return []
 
@@ -70,11 +70,11 @@ class OrderBookClient:
         provider: str = "schwab",
         symbol: str | None = None,
     ) -> list[date]:
-        """Return sorted list of dates with order book data.
+        """Return sorted list of dates with level one data.
 
         If symbol is given, only return dates that have data for that symbol.
         """
-        base = self._cfg.provider_order_book_dir(provider)
+        base = self._cfg.provider_level_one_dir(provider)
         if not base.exists():
             return []
         dates: list[date] = []
@@ -91,15 +91,15 @@ class OrderBookClient:
         return sorted(dates)
 
     def list_providers(self) -> list[str]:
-        """Return sorted list of order book data providers."""
-        base = self._cfg.order_book_dir
+        """Return sorted list of level one data providers."""
+        base = self._cfg.level_one_dir
         if not base.exists():
             return []
         return sorted(d.name for d in base.iterdir() if d.is_dir())
 
     def _date_dir(self, provider: str, d: date) -> Path:
         return (
-            self._cfg.provider_order_book_dir(provider)
+            self._cfg.provider_level_one_dir(provider)
             / f"{d.year:04d}"
             / f"{d.month:02d}"
             / f"{d.day:02d}"

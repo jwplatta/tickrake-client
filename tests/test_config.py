@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tickrake_client.config import TickrakeConfig
+from tractatus.tickrake.config import TickrakeConfig
 
 
 def test_from_env_defaults(monkeypatch):

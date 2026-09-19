@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from tickrake_client.order_book import OrderBookClient
+from tractatus.tickrake.order_book import OrderBookClient
 
 
 def test_list_providers(cfg, order_book_dir):

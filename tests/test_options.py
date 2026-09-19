@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from datetime import date
 
-from tickrake_client.options.archive import ArchiveClient
-from tickrake_client.options.filesystem import FilesystemClient, parse_snapshot_filename
+from tractatus.tickrake.options.archive import ArchiveClient
+from tractatus.tickrake.options.filesystem import FilesystemClient, parse_snapshot_filename
 
 
 def test_list_roots(cfg, options_dir):

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from tickrake_client.level_one import LevelOneClient
+from tractatus.tickrake.level_one import LevelOneClient
 
 
 def test_list_providers(cfg, level_one_dir):

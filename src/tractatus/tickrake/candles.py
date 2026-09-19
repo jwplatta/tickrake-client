@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from tickrake_client.config import TickrakeConfig
+from tractatus.tickrake.config import TickrakeConfig
 
 
 class CandlesClient:

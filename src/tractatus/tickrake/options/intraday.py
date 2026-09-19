@@ -15,7 +15,7 @@ from botocore.config import Config
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
 
-from tickrake_client.config import TickrakeConfig
+from tractatus.tickrake.config import TickrakeConfig
 
 
 class IntradayClient:

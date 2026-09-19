@@ -1,7 +1,7 @@
 [project]
-name = "tickrake-client"
-version = "0.1.0"
-description = "Client for tickrake data sources (MinIO intraday, S3 archive, local filesystem)"
+name = "tractatus"
+version = "0.2.0"
+description = "Tractatus Research — data access, calculations, and utilities for trading research"
 readme = "README.md"
 authors = [
     { name = "Joseph Platta", email = "jwplatta@gmail.com" }
