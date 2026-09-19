@@ -31,10 +31,13 @@ class CandlesClient:
             return pd.DataFrame(columns=["datetime", "open", "high", "low", "close", "volume"])
 
         df = pd.read_csv(path, parse_dates=["datetime"])
+        if df["datetime"].dt.tz is None:
+            df["datetime"] = df["datetime"].dt.tz_localize("UTC")
         if start is not None:
             df = df[df["datetime"] >= pd.Timestamp(start, tz="UTC")]
         if end is not None:
-            df = df[df["datetime"] <= pd.Timestamp(end, tz="UTC")]
+            end_ts = pd.Timestamp(end, tz="UTC") + pd.Timedelta(days=1) - pd.Timedelta(nanoseconds=1)
+            df = df[df["datetime"] <= end_ts]
         return df
 
     def list_symbols(self, provider: str = "schwab", frequency: str | None = None) -> list[str]:
