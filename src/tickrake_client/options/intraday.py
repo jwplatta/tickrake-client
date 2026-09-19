@@ -54,7 +54,9 @@ class IntradayClient:
     ) -> dict[date, str]:
         """Return {expiry: s3_uri} for expirations in [start_exp, end_exp]."""
         index = self.fetch_index(root, provider)
-        files: list[dict[str, Any]] = index.get("intraday", {}).get("files", [])
+        files: list[dict[str, Any]] = index.get("option_chains", index.get("intraday", {})).get(
+            "files", []
+        )
         result: dict[date, str] = {}
         for f in files:
             exp = date.fromisoformat(str(f["expiration_date"]))
@@ -65,5 +67,30 @@ class IntradayClient:
     def list_expirations(self, root: str, provider: str = "schwab") -> list[date]:
         """Return sorted list of expiration dates currently in the intraday index."""
         index = self.fetch_index(root, provider)
-        files: list[dict[str, Any]] = index.get("intraday", {}).get("files", [])
+        files: list[dict[str, Any]] = index.get("option_chains", index.get("intraday", {})).get(
+            "files", []
+        )
         return sorted({date.fromisoformat(str(f["expiration_date"])) for f in files})
+
+    def fetch_candle_csv(
+        self,
+        symbol: str,
+        frequency: str,
+        provider: str = "schwab",
+    ) -> pd.DataFrame:
+        """Fetch a candle CSV from MinIO and return a DataFrame.
+
+        Reads from the key: intraday/{provider}/candles/{frequency}/{symbol}.csv
+        """
+        key = f"intraday/{provider}/candles/{frequency}/{symbol}.csv"
+        resp = self._s3.get_object(Bucket=self._cfg.minio_bucket, Key=key)
+        content = resp["Body"].read().decode("utf-8")
+        df = pd.read_csv(StringIO(content), parse_dates=["datetime"])
+        return df
+
+    def list_candle_frequencies(self, symbol: str, provider: str = "schwab") -> list[str]:
+        """Return sorted list of candle frequencies available for a symbol in the intraday index."""
+        index = self.fetch_index(symbol, provider)
+        candles = index.get("candles", {})
+        files: list[dict[str, Any]] = candles.get("files", [])
+        return sorted({str(f["frequency"]) for f in files})
