@@ -1,5 +1,7 @@
 # tickrake-client
 
+[![CI](https://github.com/jwplatta/tickrake-client/actions/workflows/ci.yml/badge.svg)](https://github.com/jwplatta/tickrake-client/actions/workflows/ci.yml)
+
 Python client for reading data collected by [tickrake](https://github.com/jwplatta/tickrake). Provides a unified interface over local filesystem data, MinIO intraday snapshots, and S3 historical archives.
 
 ## Supported data types
