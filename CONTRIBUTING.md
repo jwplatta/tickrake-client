@@ -29,6 +29,10 @@ uv run mypy src
 uv run pytest
 ```
 
+## Testing
+
+Write simple tests that focus on core functionality — reading data, discovery helpers, and config behavior. Use `tmp_path` fixtures to create minimal data directory structures rather than mocking. Tests should verify that the right data comes back in the right shape, not implementation details. See `tests/conftest.py` for shared fixture examples.
+
 ## Project boundaries
 
 - Keep production code under `src/tickrake_client/`.
