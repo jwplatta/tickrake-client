@@ -66,7 +66,7 @@ def _aggregate_side_gex_by_strike(
 
     calls = df[df["contract_type"] == "CALL"].groupby("K", as_index=False)[value_col].sum()
     puts = df[df["contract_type"] == "PUT"].groupby("K", as_index=False)[value_col].sum()
-    return calls.rename(columns={value_col: "gex"}), puts.rename(columns={value_col: "gex"})
+    return calls.rename(columns={value_col: "gex"}), puts.rename(columns={value_col: "gex"})  # type: ignore[call-overload]
 
 
 def _clustered_wall_candidates(
@@ -88,14 +88,14 @@ def _clustered_wall_candidates(
     if not calls.empty:
         per_exp_call = calls.groupby(["expiration_date", "K"], as_index=False)["gex"].sum()
         call_walls = (
-            per_exp_call.sort_values(["expiration_date", "gex"], ascending=[True, False])
+            per_exp_call.sort_values(["expiration_date", "gex"], ascending=[True, False])  # type: ignore[call-overload]
             .groupby("expiration_date", as_index=False)
             .first()[["K", "gex"]]
         )
     if not puts.empty:
         per_exp_put = puts.groupby(["expiration_date", "K"], as_index=False)["gex"].sum()
         put_walls = (
-            per_exp_put.sort_values(["expiration_date", "gex"], ascending=[True, True])
+            per_exp_put.sort_values(["expiration_date", "gex"], ascending=[True, True])  # type: ignore[call-overload]
             .groupby("expiration_date", as_index=False)
             .first()[["K", "gex"]]
         )
@@ -240,9 +240,9 @@ def find_raw_wall_strikes(
     put_source = otm_puts if not otm_puts.empty else puts
 
     call_wall = (
-        None if call_source.empty else float(call_source.loc[call_source["gex"].idxmax(), "K"])
+        None if call_source.empty else float(call_source.loc[call_source["gex"].idxmax(), "K"])  # type: ignore[arg-type, index]
     )
-    put_wall = None if put_source.empty else float(put_source.loc[put_source["gex"].idxmin(), "K"])
+    put_wall = None if put_source.empty else float(put_source.loc[put_source["gex"].idxmin(), "K"])  # type: ignore[arg-type, index]
     return call_wall, put_wall
 
 
@@ -302,9 +302,9 @@ def find_aggregate_wall_strikes(
     put_source = otm_puts if not otm_puts.empty else puts
 
     call_wall = (
-        None if call_source.empty else float(call_source.loc[call_source["gex"].idxmax(), "K"])
+        None if call_source.empty else float(call_source.loc[call_source["gex"].idxmax(), "K"])  # type: ignore[arg-type, index]
     )
-    put_wall = None if put_source.empty else float(put_source.loc[put_source["gex"].idxmin(), "K"])
+    put_wall = None if put_source.empty else float(put_source.loc[put_source["gex"].idxmin(), "K"])  # type: ignore[arg-type, index]
     return call_wall, put_wall
 
 
@@ -420,7 +420,7 @@ def _cluster_candidates_into_zones(
             peaks.append({"K": float(row["K"]), "score": score})
 
     if not peaks:
-        best_k = float(candidates.loc[candidates["score"].idxmax(), "K"])
+        best_k = float(candidates.loc[candidates["score"].idxmax(), "K"])  # type: ignore[arg-type, index]
         peaks = [{"K": best_k, "score": max_score}]
 
     peak_threshold = 0.8

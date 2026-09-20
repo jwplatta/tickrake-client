@@ -214,14 +214,14 @@ def compute_oi_zscore_matrix(
                 ],
             )[0]
 
-            if pd.isna(dte_bin) or pd.isna(m_bin):
+            if pd.isna(dte_bin) or pd.isna(m_bin):  # type: ignore[call-overload]
                 continue
 
             key = (opt_ct, dte_bin, m_bin)
             if key not in bucket_stats.index:
                 continue
 
-            stat_row: pd.Series = bucket_stats.loc[key, :]  # type: ignore[assignment]
+            stat_row: pd.Series = bucket_stats.loc[key, :]  # type: ignore[index]
             cnt = int(stat_row["count"])
             std = float(stat_row["oi_std"])
             mean = float(stat_row["oi_mean"])

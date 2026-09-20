@@ -20,7 +20,7 @@ def realized_vol(prices: pd.Series, window: int, periods_per_year: int = 252) ->
     and H_bars is the window length. Use window=trading days in horizon and
     periods_per_year=252 for daily data; scale both proportionally for intraday.
     """
-    log_returns: pd.Series = np.log(prices / prices.shift(1))
+    log_returns: pd.Series = np.log(prices / prices.shift(1))  # type: ignore[assignment]
     rolling_sum: pd.Series = (log_returns**2).rolling(window=window).sum()
     return pd.Series(
         100.0 * np.sqrt((periods_per_year / window) * rolling_sum),
