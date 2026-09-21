@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -10,20 +11,22 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-from dotenv import load_dotenv
 
+from tractatus.config import TractatusConfig, config_template, default_config_path
 from tractatus.tickrake import TickrakeClient
 
 app = typer.Typer(no_args_is_help=True, help="Tractatus research tools.")
 init_app = typer.Typer(no_args_is_help=True, help="Create a research project.")
 data_app = typer.Typer(no_args_is_help=True, help="Retrieve Tickrake data.")
+config_app = typer.Typer(no_args_is_help=True, help="Manage Tractatus configuration.")
 app.add_typer(init_app, name="init")
 app.add_typer(data_app, name="data")
+app.add_typer(config_app, name="config")
 
 _PROJECT_FILES = {
     ".python-version": "3.11\n",
     ".gitignore": """.env\n.venv/\nmlruns/\nmlartifacts/\n.ipynb_checkpoints/\n.pytest_cache/\n.mypy_cache/\n.ruff_cache/\n__pycache__/\ndata/*\n!data/README.md\n""",
-    ".env": "MLFLOW_TRACKING_URI=http://localhost:5000\nMLFLOW_EXPERIMENT_NAME=default\nAWS_REGION=us-east-1\n",
+    ".env": """# Project-specific non-secret defaults. Exported environment variables override these.\nMLFLOW_TRACKING_URI=http://localhost:5000\nMLFLOW_EXPERIMENT_NAME=default\nAWS_PROFILE=default\nAWS_REGION=us-east-1\nS3_BUCKET=your-tickrake-bucket\nS3_REGION=us-east-1\nTICKRAKE_DATA_DIR=~/.tickrake/data\n""",
     ".env.example": """# MLflow server; use http://localhost:5000 for local research infrastructure\nMLFLOW_TRACKING_URI=http://localhost:5000\nMLFLOW_EXPERIMENT_NAME=my-first-study\n# AWS credentials are resolved by the normal AWS profile chain\nAWS_PROFILE=default\nAWS_REGION=us-east-1\nS3_BUCKET=your-tickrake-bucket\nS3_REGION=us-east-1\n# Tickrake's only cache. Do not point this at this project's data/ directory.\nTICKRAKE_DATA_DIR=/absolute/path/to/tickrake/data\n""",
     "data/README.md": """# Disposable study data\n\nUse this directory for disposable inputs and derived files. Tickrake market data remains exclusively in `TICKRAKE_DATA_DIR`; this is not a second Tickrake cache.\n""",
     "artifacts/.gitkeep": "",
@@ -115,6 +118,32 @@ def data_pull_options(
     typer.echo(path)
 
 
+@config_app.command("init")
+def config_init(
+    force: Annotated[
+        bool, typer.Option("--force", help="Replace an existing config file.")
+    ] = False,
+) -> None:
+    """Create a personal non-secret config template at ~/.tractatus/config.toml."""
+    path = default_config_path()
+    if path.exists() and not force:
+        typer.echo(f"Config already exists: {path}. Use --force to replace it.", err=True)
+        raise typer.Exit(1)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(config_template())
+    typer.echo(f"Created {path}")
+
+
+@config_app.command("show")
+def config_show(
+    effective: Annotated[bool, typer.Option("--effective", help="Show resolved settings.")] = False,
+) -> None:
+    """Show configuration without ever exposing credentials or tokens."""
+    if not effective:
+        raise typer.BadParameter("use --effective to display resolved configuration")
+    typer.echo(json.dumps(TractatusConfig.load().as_dict(), indent=2, sort_keys=True))
+
+
 @app.command()
 def notebook() -> None:
     """Start JupyterLab from a generated research repository."""
@@ -126,12 +155,12 @@ def notebook() -> None:
 @app.command()
 def verify() -> None:
     """Validate project configuration and run the packaged smoke backtest."""
-    load_dotenv()
     import mlflow  # type: ignore[import-not-found]
 
     root = Path.cwd()
     if not (root / "research" / "smoke_backtest.py").exists():
         raise typer.BadParameter("run verify from a generated research project")
+    config = TractatusConfig.load(project_dir=root)
     client = TickrakeClient()
     # The maintained fixture is intentionally configured by the research project/environment.
     fixture_root = os.environ.get("TRACTATUS_SMOKE_ROOT", "SPXW")
@@ -146,7 +175,8 @@ def verify() -> None:
     from research.smoke_backtest import run  # type: ignore[import-not-found]
 
     metrics = run(pd.read_parquet(parquet))
-    mlflow.set_experiment(os.environ.get("MLFLOW_EXPERIMENT_NAME", "default"))
+    mlflow.set_tracking_uri(config.mlflow_tracking_uri)
+    mlflow.set_experiment(config.mlflow_experiment_name)
     with mlflow.start_run() as active_run:
         mlflow.log_params(
             {"root": fixture_root, "sample_date": fixture_date.isoformat(), "path": str(parquet)}

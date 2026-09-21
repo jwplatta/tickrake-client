@@ -24,7 +24,8 @@ from tractatus.tickrake.config import TickrakeConfig
 class ArchiveClient:
     def __init__(self, cfg: TickrakeConfig) -> None:
         self._cfg = cfg
-        self._s3: S3Client = boto3.client("s3", region_name=cfg.s3_region)
+        session = boto3.Session(profile_name=cfg.aws_profile, region_name=cfg.s3_region)
+        self._s3: S3Client = session.client("s3")
 
     def get_root_index(
         self, root: str, provider: str = "schwab", *, refresh: bool = False

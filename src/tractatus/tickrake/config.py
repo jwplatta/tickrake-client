@@ -6,7 +6,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-_DEFAULT_DATA_DIR = Path.home() / ".tickrake" / "data"
+from tractatus.config import TractatusConfig
 
 
 @dataclass
@@ -18,6 +18,7 @@ class TickrakeConfig:
     minio_secret_key: str
     s3_bucket: str
     s3_region: str
+    aws_profile: str | None = None
 
     @property
     def options_dir(self) -> Path:
@@ -53,13 +54,17 @@ class TickrakeConfig:
 
     @classmethod
     def from_env(cls) -> TickrakeConfig:
-        data_dir = Path(os.environ.get("TICKRAKE_DATA_DIR", str(_DEFAULT_DATA_DIR)))
+        return cls.from_tractatus_config(TractatusConfig.load())
+
+    @classmethod
+    def from_tractatus_config(cls, config: TractatusConfig) -> TickrakeConfig:
         return cls(
-            data_dir=data_dir,
+            data_dir=config.tickrake_data_dir,
             minio_endpoint=os.environ.get("MINIO_ENDPOINT", "http://localhost:9000"),
             minio_bucket=os.environ.get("MINIO_BUCKET", "tickrake"),
             minio_access_key=os.environ.get("MINIO_ACCESS_KEY", ""),
             minio_secret_key=os.environ.get("MINIO_SECRET_KEY", ""),
-            s3_bucket=os.environ.get("S3_BUCKET", ""),
-            s3_region=os.environ.get("S3_REGION", "us-east-1"),
+            s3_bucket=config.s3_bucket or "",
+            s3_region=config.s3_region,
+            aws_profile=config.aws_profile,
         )
