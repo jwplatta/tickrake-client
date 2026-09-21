@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from datetime import date
 from io import StringIO
 from typing import TYPE_CHECKING, Any, cast
@@ -11,11 +12,14 @@ from urllib.parse import urlparse
 import boto3
 import pandas as pd
 from botocore.config import Config
+from botocore.exceptions import ClientError
+
+from tractatus.tickrake.config import TickrakeConfig
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
-
-from tractatus.tickrake.config import TickrakeConfig
 
 
 class IntradayClient:
@@ -30,9 +34,21 @@ class IntradayClient:
         )
 
     def fetch_index(self, root: str, provider: str = "schwab") -> dict[str, Any]:
-        """Fetch the intraday index JSON for root from MinIO."""
+        """Fetch the intraday index JSON for root from MinIO.
+
+        Returns an empty dict when the key or bucket does not exist, or when
+        the MinIO endpoint is unreachable.
+        """
         key = f"intraday/{provider}/{root}.json"
-        resp = self._s3.get_object(Bucket=self._cfg.minio_bucket, Key=key)
+        try:
+            resp = self._s3.get_object(Bucket=self._cfg.minio_bucket, Key=key)
+        except ClientError as exc:
+            code = exc.response.get("Error", {}).get("Code", "")
+            logger.debug("fetch_index %s: %s (%s)", key, code, exc)
+            return {}
+        except Exception as exc:
+            logger.debug("fetch_index %s: %s", key, exc)
+            return {}
         return cast(dict[str, Any], json.loads(resp["Body"].read()))
 
     def fetch_csv(self, uri: str, dtypes: dict[str, Any]) -> pd.DataFrame:
