@@ -82,3 +82,32 @@ def test_archive_get_parquet_path_local_cache_hit(cfg, options_dir):
     assert path is not None
     assert path.exists()
     assert path.suffix == ".parquet"
+
+
+def test_archive_descriptor_lookup_supports_live_list_schema(cfg, monkeypatch):
+    client = ArchiveClient(cfg)
+    monkeypatch.setattr(
+        client,
+        "get_root_index",
+        lambda *_args, **_kwargs: {
+            "historical": [
+                {
+                    "sample_date": "2025-12-18",
+                    "files": [
+                        {"format": "csv", "uri": "s3://tickrake/SPXW_samples_2025-12-18.csv"},
+                        {
+                            "format": "parquet",
+                            "uri": "s3://tickrake/SPXW_samples_2025-12-18.parquet",
+                        },
+                    ],
+                }
+            ]
+        },
+    )
+
+    descriptor = client._find_parquet_descriptor("SPXW", date(2025, 12, 18), "schwab", False)
+
+    assert descriptor == {
+        "format": "parquet",
+        "uri": "s3://tickrake/SPXW_samples_2025-12-18.parquet",
+    }

@@ -71,9 +71,15 @@ class ArchiveClient:
         index = self.get_root_index(root, provider, refresh=refresh)
         for entry in index.get("historical", []):
             if entry.get("sample_date") == sample_date.isoformat():
-                parquet = entry.get("files", {}).get("parquet")
-                if isinstance(parquet, dict) and parquet.get("uri"):
-                    return cast(dict[str, Any], parquet)
+                files = entry.get("files")
+                if isinstance(files, list):
+                    for descriptor in files:
+                        if (
+                            isinstance(descriptor, dict)
+                            and descriptor.get("format") == "parquet"
+                            and descriptor.get("uri")
+                        ):
+                            return cast(dict[str, Any], descriptor)
         return None
 
     def _download_index(self, root: str, provider: str, path: Path) -> None:
