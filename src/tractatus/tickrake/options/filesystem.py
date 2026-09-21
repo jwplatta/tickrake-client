@@ -104,12 +104,21 @@ class FilesystemClient:
         return sorted(expiries)
 
     def list_roots(self, provider: str = "schwab") -> list[str]:
-        """Return sorted list of option roots with index files."""
-        tickers_json = self._cfg.provider_options_dir(provider) / "tickers.json"
-        if not tickers_json.exists():
-            return []
-        data = json.loads(tickers_json.read_text())
-        return sorted(data.get("roots", []))
+        """Return sorted list of option roots with index files.
+
+        Reads from tickers.json first. Falls back to scanning the provider
+        directory for per-root *.json index files when tickers.json is absent
+        or its roots list is empty.
+        """
+        opts_dir = self._cfg.provider_options_dir(provider)
+        tickers_json = opts_dir / "tickers.json"
+        if tickers_json.exists():
+            data = json.loads(tickers_json.read_text())
+            roots = sorted(data.get("roots", []))
+            if roots:
+                return roots
+        # Fallback: discover roots from per-symbol index files present on disk
+        return sorted(p.stem for p in opts_dir.glob("*.json") if p.stem != "tickers")
 
 
 def parse_snapshot_filename(path: Path) -> tuple[date, datetime] | None:
