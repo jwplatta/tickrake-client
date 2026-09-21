@@ -85,7 +85,9 @@ class ArchiveClient:
         except Exception as exc:  # boto errors differ across endpoint implementations
             if path.exists():
                 return
-            raise RuntimeError(f"Could not fetch published index s3://{self._cfg.s3_bucket}/{key}: {exc}") from exc
+            raise RuntimeError(
+                f"Could not fetch published index s3://{self._cfg.s3_bucket}/{key}: {exc}"
+            ) from exc
 
     def _download_descriptor(self, descriptor: dict[str, Any], local_path: Path) -> None:
         uri = str(descriptor["uri"])
@@ -100,7 +102,10 @@ class ArchiveClient:
             self._atomic_s3_download(bucket, key, local_path)
             digest = self._sha256(local_path)
             expected_digest = descriptor.get("sha256") or descriptor.get("digest")
-            if expected_digest and digest.lower() != str(expected_digest).removeprefix("sha256:").lower():
+            if (
+                expected_digest
+                and digest.lower() != str(expected_digest).removeprefix("sha256:").lower()
+            ):
                 local_path.unlink(missing_ok=True)
                 raise ValueError(f"Integrity check failed for {uri}: digest mismatch")
             expected_size = descriptor.get("size") or descriptor.get("byte_size")
@@ -123,7 +128,9 @@ class ArchiveClient:
 
     def _atomic_s3_download(self, bucket: str, key: str, destination: Path) -> None:
         destination.parent.mkdir(parents=True, exist_ok=True)
-        fd, temporary = tempfile.mkstemp(prefix=f".{destination.name}.", suffix=".tmp", dir=destination.parent)
+        fd, temporary = tempfile.mkstemp(
+            prefix=f".{destination.name}.", suffix=".tmp", dir=destination.parent
+        )
         os.close(fd)
         try:
             self._s3.download_file(bucket, key, temporary)

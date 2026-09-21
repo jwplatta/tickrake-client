@@ -138,7 +138,9 @@ def verify() -> None:
     fixture_date = date.fromisoformat(os.environ.get("TRACTATUS_SMOKE_DATE", "2026-01-02"))
     parquet = client.options_archive.get_parquet_path(fixture_root, fixture_date)
     if parquet is None:
-        typer.echo("Packaged smoke dataset is unavailable from the configured Tickrake archive", err=True)
+        typer.echo(
+            "Packaged smoke dataset is unavailable from the configured Tickrake archive", err=True
+        )
         raise typer.Exit(1)
     import pandas as pd
     from research.smoke_backtest import run  # type: ignore[import-not-found]
@@ -146,7 +148,9 @@ def verify() -> None:
     metrics = run(pd.read_parquet(parquet))
     mlflow.set_experiment(os.environ.get("MLFLOW_EXPERIMENT_NAME", "default"))
     with mlflow.start_run() as active_run:
-        mlflow.log_params({"root": fixture_root, "sample_date": fixture_date.isoformat(), "path": str(parquet)})
+        mlflow.log_params(
+            {"root": fixture_root, "sample_date": fixture_date.isoformat(), "path": str(parquet)}
+        )
         mlflow.log_metrics(metrics)
         artifact = root / "artifacts" / "smoke_metrics.json"
         artifact.write_text(__import__("json").dumps(metrics, indent=2))
